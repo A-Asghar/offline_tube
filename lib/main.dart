@@ -6,7 +6,7 @@ import 'package:offline_tube/bottom_nav_bar/bottom_navbar.dart';
 import 'package:offline_tube/services/navigation_service.dart';
 import 'package:offline_tube/services/video_service.dart';
 import 'package:offline_tube/util/video_extensions.dart';
-import 'package:offline_tube/youtube_service.dart';
+import 'package:offline_tube/services/youtube_service.dart';
 
 final GetIt getIt = GetIt.instance;
 YoutubeService youtubeService = YoutubeService.instance;
