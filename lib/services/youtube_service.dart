@@ -1,7 +1,6 @@
 // lib/services/youtube_service.dart
 import 'dart:io';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:offline_tube/util/video_extensions.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
@@ -118,7 +117,8 @@ class YoutubeService {
 // }
 
 Future<List<VideoWrapper>?> fetchRecommendedVideos(
-    Map<String, dynamic> args) async {
+  Map<String, dynamic> args,
+) async {
   try {
     VideoWrapper wrapper = VideoWrapper.fromJson(args);
     Video video = wrapper.video;

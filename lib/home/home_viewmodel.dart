@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:offline_tube/main.dart';
 import 'package:offline_tube/util/video_extensions.dart';
 import 'package:stacked/stacked.dart';
-import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 class HomeViewModel extends BaseViewModel {
   bool isLoading = false;
