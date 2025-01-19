@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:offline_tube/home/widgets/video_list.dart';
 import 'package:offline_tube/search/search_viewmodel.dart';
 import 'package:offline_tube/search/widgets/search_bar.dart';
-import 'package:offline_tube/util/video_extensions.dart';
-import 'package:offline_tube/widgets/loading_widget.dart';
+import 'package:offline_tube/widgets/shimmer_video_list.dart';
 import 'package:offline_tube/widgets/video_item.dart';
 import 'package:stacked/stacked.dart';
 
@@ -27,41 +27,19 @@ class SearchView extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   if (model.isLoading)
-                    const Expanded(child: Loading())
+                    const Expanded(child: ShimmerVideoList())
                   else
                     model.response == null
                         ? const SizedBox.shrink()
                         : Expanded(
-                            child: ListView.builder(
-                              controller: model.scrollController,
-                              itemCount: model.searchResults?.length ?? 0,
-                              itemBuilder: (context, index) {
-                                final video = model.searchResults?[index];
-                                if (video == null) {
-                                  return const SizedBox.shrink();
-                                }
-                                return VideoItem(
-                                  video: video,
-                                  onTap: () => handleVideoTap(
-                                    video.unDownloaded,
-                                    context,
-                                  ),
-                                );
-                              },
+                            child: VideoList(
+                              videos: model.searchResults ?? [],
+                              scrollController: model.scrollController,
+                              onVideoTap: (video) =>
+                                  handleVideoTap(video, context),
+                              isLoadingMore: model.isLoadingMore,
                             ),
                           ),
-                  if (model.isLoadingMore) ...[
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 16.0),
-                      child: SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: Center(
-                          child: CircularProgressIndicator(strokeWidth: 3),
-                        ),
-                      ),
-                    ),
-                  ],
                 ],
               ),
             ),

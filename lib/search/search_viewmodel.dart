@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:offline_tube/main.dart';
+import 'package:offline_tube/util/video_extensions.dart';
 import 'package:stacked/stacked.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
@@ -9,9 +10,16 @@ class SearchViewModel extends BaseViewModel {
   bool isLoadingMore = false;
   String searchText = '';
 
+  int _searches = 0;
+  int get searches => _searches;
+  set searches(int val) {
+    _searches = val;
+    notifyListeners();
+  }
+
   final ScrollController scrollController = ScrollController();
 
-  List<Video>? searchResults;
+  List<VideoWrapper>? searchResults;
 
   VideoSearchList? response;
 
@@ -28,11 +36,12 @@ class SearchViewModel extends BaseViewModel {
   }
 
   Future<void> handleSearch(String query) async {
+    searches = 0;
     isLoading = true;
     notifyListeners();
 
     response = await _search(query);
-    searchResults = response;
+    searchResults = response?.map((e) => e.unDownloaded).toList();
     searchText = query;
 
     isLoading = false;
@@ -41,12 +50,15 @@ class SearchViewModel extends BaseViewModel {
 
   Future<void> loadMore() async {
     if (response == null) return;
+    if (searches >= 3) return;
+
+    searches++;
 
     isLoadingMore = true;
     notifyListeners();
 
     response = await _search(searchText, response);
-    searchResults?.addAll(response ?? []);
+    searchResults?.addAll(response?.map((e) => e.unDownloaded).toList() ?? []);
 
     isLoadingMore = false;
     notifyListeners();
