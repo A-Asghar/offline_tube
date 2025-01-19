@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:offline_tube/home/home_viewmodel.dart';
+import 'package:offline_tube/home/widgets/no_videos.dart';
 import 'package:offline_tube/home/widgets/video_list.dart';
 import 'package:offline_tube/main.dart';
-import 'package:offline_tube/widgets/loading_widget.dart';
+import 'package:offline_tube/widgets/shimmer_video_item.dart';
+import 'package:offline_tube/widgets/video_item.dart';
 import 'package:stacked/stacked.dart';
 
 class HomeView extends StatelessWidget {
@@ -17,29 +19,30 @@ class HomeView extends StatelessWidget {
         return Scaffold(
           body: SafeArea(
             child: model.isLoading
-                ? const Center(child: Loading())
-                : Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 10),
-                          child: VideoList(
-                            videos: videoService.recommendedVideos,
-                            scrollController: model.scrollController,
-                            onVideoTap: (video) =>
-                                model.handleVideoTap(video, context),
+                ? Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    child: ListView(
+                      children: [
+                        for (int i = 0; i < 3; i++) const ShimmerVideoItem(),
+                      ],
+                    ),
+                  )
+                : videoService.recommendedVideos.isEmpty
+                    ? const NoVideos()
+                    : Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                        ),
+                        child: VideoList(
+                          videos: videoService.recommendedVideos,
+                          scrollController: model.scrollController,
+                          isLoadingMore: model.isLoadingMore,
+                          onVideoTap: (video) => handleVideoTap(
+                            video,
+                            context,
                           ),
                         ),
                       ),
-                      if (model.isLoadingMore)
-                        Container(
-                          color: Colors.transparent,
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          child: const Loading(),
-                        ),
-                    ],
-                  ),
           ),
         );
       },

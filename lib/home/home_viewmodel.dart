@@ -117,10 +117,6 @@ class HomeViewModel extends BaseViewModel {
     return result;
   }
 
-  void handleVideoTap(VideoWrapper video, BuildContext context) {
-    handleVideoTap(video, context);
-  }
-
   @override
   void dispose() {
     scrollController.dispose();
