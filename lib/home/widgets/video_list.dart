@@ -17,6 +17,16 @@ class VideoList extends StatelessWidget {
     required this.isLoadingMore,
   });
 
+  void _scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      scrollController.animateTo(
+        scrollController.position.maxScrollExtent,
+        duration: const Duration(seconds: 1),
+        curve: Curves.easeOut,
+      );
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
@@ -24,13 +34,8 @@ class VideoList extends StatelessWidget {
       controller: scrollController,
       itemCount: isLoadingMore ? videos.length + 1 : videos.length,
       itemBuilder: (context, index) {
-        if (index == videos.length - 1) {
-          scrollController.animateTo(
-            scrollController.position.maxScrollExtent + 200,
-            duration: const Duration(seconds: 1),
-            curve: Curves.ease,
-          );
-        }
+        if (index == videos.length - 1) _scrollToBottom();
+
         if (isLoadingMore && index == videos.length) {
           return const ShimmerVideoItem();
         }
