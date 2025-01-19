@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:offline_tube/main.dart';
 import 'package:offline_tube/util/video_extensions.dart';
 import 'package:stacked/stacked.dart';
-import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 class HomeViewModel extends BaseViewModel {
   bool isLoading = false;
@@ -59,9 +58,6 @@ class HomeViewModel extends BaseViewModel {
   Future<void> _getRecommended() async {
     if (videoService.recommendedVideos.isNotEmpty) return;
 
-    isLoading = true;
-    notifyListeners();
-
     final List<VideoWrapper> list = await _getRandom(2);
 
     final results = await Future.wait(
@@ -72,15 +68,12 @@ class HomeViewModel extends BaseViewModel {
       if (r == null) continue;
       final newVideos = _removeDuplicates(r.toList());
       videoService.recommendedVideos.addAll(
-        newVideos.map((e) => e.unDownloaded),
+        newVideos.map((e) => e),
       );
-      _existingVideoIds.addAll(newVideos.map((v) => v.id.value));
+      _existingVideoIds.addAll(newVideos.map((v) => v.video.id.value));
     }
 
     videoService.recommendedVideos.shuffle();
-
-    isLoading = false;
-    notifyListeners();
   }
 
   Future<void> _loadMore() async {
@@ -97,9 +90,9 @@ class HomeViewModel extends BaseViewModel {
       if (r == null) continue;
       final newVideos = _removeDuplicates(r.toList());
       videoService.recommendedVideos.addAll(
-        newVideos.map((e) => e.unDownloaded),
+        newVideos.map((e) => e),
       );
-      _existingVideoIds.addAll(newVideos.map((v) => v.id.value));
+      _existingVideoIds.addAll(newVideos.map((v) => v.video.id.value));
     }
 
     isLoadingMore = false;
@@ -113,11 +106,11 @@ class HomeViewModel extends BaseViewModel {
     return shuffled.take(val).toList();
   }
 
-  List<Video> _removeDuplicates(List<Video> newVideos) {
-    final result = <Video>[];
+  List<VideoWrapper> _removeDuplicates(List<VideoWrapper> newVideos) {
+    final result = <VideoWrapper>[];
     for (final video in newVideos) {
-      if (!_existingVideoIds.contains(video.id.value)) {
-        _existingVideoIds.add(video.id.value);
+      if (!_existingVideoIds.contains(video.video.id.value)) {
+        _existingVideoIds.add(video.video.id.value);
         result.add(video);
       }
     }
