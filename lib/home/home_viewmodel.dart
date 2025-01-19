@@ -41,7 +41,6 @@ class HomeViewModel extends BaseViewModel {
 
     await _getDownloadedVideos();
     await _getRecommended();
-    await Future.delayed(const Duration(seconds: 2));
 
     isLoading = false;
     notifyListeners();
