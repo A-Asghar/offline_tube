@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:offline_tube/downloads/downloads_viewmodel.dart';
-import 'package:offline_tube/widgets/shimmer_video_item.dart';
+import 'package:offline_tube/widgets/shimmer_video_list.dart';
 import 'package:stacked/stacked.dart';
 
 import 'package:offline_tube/widgets/video_item.dart';
@@ -17,13 +17,9 @@ class DownloadsView extends StatelessWidget {
         return Scaffold(
           body: SafeArea(
             child: model.isLoading
-                ? Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10),
-                    child: ListView(
-                      children: [
-                        for (int i = 0; i < 3; i++) const ShimmerVideoItem(),
-                      ],
-                    ),
+                ? const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 10),
+                    child: ShimmerVideoList(),
                   )
                 : Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 10),

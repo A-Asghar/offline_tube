@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:offline_tube/home/widgets/video_list.dart';
 import 'package:offline_tube/search/search_viewmodel.dart';
 import 'package:offline_tube/search/widgets/search_bar.dart';
-import 'package:offline_tube/widgets/shimmer_video_item.dart';
+import 'package:offline_tube/widgets/shimmer_video_list.dart';
 import 'package:offline_tube/widgets/video_item.dart';
 import 'package:stacked/stacked.dart';
 
@@ -27,13 +27,7 @@ class SearchView extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   if (model.isLoading)
-                    Expanded(
-                      child: ListView(
-                        children: [
-                          for (int i = 0; i < 3; i++) const ShimmerVideoItem(),
-                        ],
-                      ),
-                    )
+                    const Expanded(child: ShimmerVideoList())
                   else
                     model.response == null
                         ? const SizedBox.shrink()

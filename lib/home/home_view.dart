@@ -3,7 +3,7 @@ import 'package:offline_tube/home/home_viewmodel.dart';
 import 'package:offline_tube/home/widgets/no_videos.dart';
 import 'package:offline_tube/home/widgets/video_list.dart';
 import 'package:offline_tube/main.dart';
-import 'package:offline_tube/widgets/shimmer_video_item.dart';
+import 'package:offline_tube/widgets/shimmer_video_list.dart';
 import 'package:offline_tube/widgets/video_item.dart';
 import 'package:stacked/stacked.dart';
 
@@ -19,13 +19,9 @@ class HomeView extends StatelessWidget {
         return Scaffold(
           body: SafeArea(
             child: model.isLoading
-                ? Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10),
-                    child: ListView(
-                      children: [
-                        for (int i = 0; i < 3; i++) const ShimmerVideoItem(),
-                      ],
-                    ),
+                ? const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 10),
+                    child: ShimmerVideoList(),
                   )
                 : videoService.recommendedVideos.isEmpty
                     ? const NoVideos()
