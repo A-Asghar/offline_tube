@@ -81,8 +81,8 @@ class VideoPlayerViewModel extends BaseViewModel {
     notifyListeners();
 
     try {
-      await videoService.addToLocal(item: video.video.downloaded);
       await downLoadToTemp(video.video.id.value);
+      await videoService.addToLocal(item: video.video.downloaded);
       videoService.downloadedVideos.add(video);
 
       isDownloaded = true;
