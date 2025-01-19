@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:offline_tube/bottom_nav_bar/bottom_navbar_viewmodel.dart';
-import 'package:offline_tube/downloads/playlist_page.dart';
+import 'package:offline_tube/downloads/downloads_view.dart';
 import 'package:offline_tube/home/home_view.dart';
 import 'package:offline_tube/search/search_view.dart';
 import 'package:stacked/stacked.dart';
