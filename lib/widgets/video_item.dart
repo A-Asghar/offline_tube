@@ -61,10 +61,6 @@ class VideoItem extends StatelessWidget {
                       ),
                     ),
                   ),
-                  Align(
-                    alignment: Alignment.topRight,
-                    child: _MoreButton(),
-                  )
                 ],
               ),
             ),
@@ -82,7 +78,6 @@ class VideoItem extends StatelessWidget {
               ),
             ),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
                   video.author,
@@ -91,6 +86,7 @@ class VideoItem extends StatelessWidget {
                     color: Colors.white,
                   ),
                 ),
+                const Spacer(),
                 Text(
                   '${formatCount(video.engagement.viewCount)} views',
                   style: const TextStyle(
@@ -99,6 +95,8 @@ class VideoItem extends StatelessWidget {
                     color: Colors.white,
                   ),
                 ),
+                const SizedBox(width: 6),
+                _MoreButton(),
               ],
             ),
             if (onTapDelete != null) ...[
@@ -136,52 +134,59 @@ Future<void> handleVideoTap(VideoWrapper video, BuildContext context) async {
   );
 }
 
-class _MoreButton extends StatefulWidget {
-  const _MoreButton();
-
-  @override
-  State<_MoreButton> createState() => _MoreButtonState();
-}
-
-class _MoreButtonState extends State<_MoreButton> {
-  final OverlayPortalController _overlayController = OverlayPortalController();
-
+class _MoreButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: _overlayController.toggle,
-      child: Container(
-        padding: const EdgeInsets.all(4),
-        decoration: BoxDecoration(
-          color: Colors.black.withOpacity(0.6),
-          shape: BoxShape.circle,
-        ),
-        child: OverlayPortal(
-          controller: _overlayController,
-          overlayChildBuilder: (BuildContext context) {
-            return Positioned(
-              left: 50,
-              bottom: 50,
-              child: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
-                      blurRadius: 4,
-                      spreadRadius: 2,
+      onTap: () {
+        showModalBottomSheet(
+          context: context,
+          showDragHandle: true,
+          backgroundColor: Colors.black,
+          builder: (context) {
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ListTile(
+                  title: const Text(
+                    'Download',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
                     ),
-                  ],
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
                 ),
-                child: ListView(
-                  children: [
-                    const Text('Add to playlist'),
-                  ],
+                ListTile(
+                  title: const Text(
+                    'Add to playlist',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                    ),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
                 ),
-              ),
+              ],
             );
           },
+        );
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.black.withOpacity(0.6),
+          borderRadius: BorderRadius.circular(6),
+        ),
+        padding: const EdgeInsets.all(6),
+        margin: const EdgeInsets.all(4),
+        child: const Icon(
+          Icons.more_vert,
+          color: Colors.white,
+          size: 16,
         ),
       ),
     );
