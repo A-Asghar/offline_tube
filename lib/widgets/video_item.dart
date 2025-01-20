@@ -61,6 +61,10 @@ class VideoItem extends StatelessWidget {
                       ),
                     ),
                   ),
+                  Align(
+                    alignment: Alignment.topRight,
+                    child: _MoreButton(),
+                  )
                 ],
               ),
             ),
@@ -130,4 +134,56 @@ Future<void> handleVideoTap(VideoWrapper video, BuildContext context) async {
       builder: (context) => VideoPlayerView(video: video),
     ),
   );
+}
+
+class _MoreButton extends StatefulWidget {
+  const _MoreButton();
+
+  @override
+  State<_MoreButton> createState() => _MoreButtonState();
+}
+
+class _MoreButtonState extends State<_MoreButton> {
+  final OverlayPortalController _overlayController = OverlayPortalController();
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: _overlayController.toggle,
+      child: Container(
+        padding: const EdgeInsets.all(4),
+        decoration: BoxDecoration(
+          color: Colors.black.withOpacity(0.6),
+          shape: BoxShape.circle,
+        ),
+        child: OverlayPortal(
+          controller: _overlayController,
+          overlayChildBuilder: (BuildContext context) {
+            return Positioned(
+              left: 50,
+              bottom: 50,
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      blurRadius: 4,
+                      spreadRadius: 2,
+                    ),
+                  ],
+                ),
+                child: ListView(
+                  children: [
+                    const Text('Add to playlist'),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
 }
