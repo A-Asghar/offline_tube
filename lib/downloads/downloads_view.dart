@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:offline_tube/downloads/downloads_viewmodel.dart';
+import 'package:offline_tube/downloads/widgets/download_item.dart';
 import 'package:offline_tube/widgets/shimmer_video_list.dart';
 import 'package:stacked/stacked.dart';
-
-import 'package:offline_tube/widgets/video_item.dart';
 
 class DownloadsView extends StatelessWidget {
   const DownloadsView({super.key});
@@ -31,7 +30,7 @@ class DownloadsView extends StatelessWidget {
                             itemCount: model.items.length,
                             itemBuilder: (context, index) {
                               final videoWrapper = model.items[index];
-                              return VideoItem(
+                              return DownloadItem(
                                 video: videoWrapper.video,
                                 onTap: () => model.onTapPlay(index),
                                 onTapDelete: () => model.onTapDelete(index),
