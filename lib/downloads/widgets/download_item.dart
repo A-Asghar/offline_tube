@@ -10,7 +10,7 @@ class DownloadItem extends StatelessWidget {
     required this.onTap,
   });
   final Video video;
-  final Future<void> Function() onTapDelete;
+  final Future<void> Function()? onTapDelete;
   final Function() onTap;
 
   @override
@@ -67,19 +67,25 @@ class DownloadItem extends StatelessWidget {
                         flex: 1,
                         child: InkWell(
                           borderRadius: BorderRadius.circular(6),
-                          onTap: () {
-                            showDialog(
-                              context: context,
-                              builder: (context) {
-                                return DeleteDialog(onTapDelete: onTapDelete);
-                              },
-                            );
-                          },
-                          child: const Icon(
-                            Icons.delete,
-                            color: Colors.red,
-                            size: 26,
-                          ),
+                          onTap: onTapDelete == null
+                              ? null
+                              : () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) {
+                                      return DeleteDialog(
+                                        onTapDelete: onTapDelete!,
+                                      );
+                                    },
+                                  );
+                                },
+                          child: onTapDelete == null
+                              ? const SizedBox.shrink()
+                              : const Icon(
+                                  Icons.delete,
+                                  color: Colors.red,
+                                  size: 26,
+                                ),
                         ),
                       ),
                     ],

@@ -12,6 +12,13 @@ class DownloadsViewModel extends BaseViewModel {
   bool isLoading = false;
   List<VideoWrapper> items = [];
 
+  VideoWrapper? _currentPlaying;
+  VideoWrapper? get currentPlaying => _currentPlaying;
+  set currentPlaying(VideoWrapper? value) {
+    _currentPlaying = value;
+    notifyListeners();
+  }
+
   Future<void> init() async {
     isLoading = true;
     notifyListeners();
@@ -53,6 +60,7 @@ class DownloadsViewModel extends BaseViewModel {
   Future<void> onTapPlay(int index) async {
     await _audioHandler.skipToQueueItem(index);
     _audioHandler.play();
+    currentPlaying = items[index];
   }
 
   Future<void> onTapDelete(int index) async {
