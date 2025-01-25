@@ -42,7 +42,7 @@ class DownloadItem extends StatelessWidget {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      fontSize: 16,
+                      fontSize: 13,
                       fontWeight: FontWeight.w500,
                       color: Colors.white,
                     ),
@@ -58,7 +58,7 @@ class DownloadItem extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
-                            fontSize: 14,
+                            fontSize: 10,
                             color: Colors.white,
                           ),
                         ),

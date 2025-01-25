@@ -25,7 +25,10 @@ class YoutubeService {
     return await _youtubeExplode.search.search(query);
   }
 
-  Future<String?> downloadAudioToTemp(String videoId) async {
+  Future<String?> downloadAudioToTemp(
+    String videoId, {
+    Function(double progress)? onProgress,
+  }) async {
     return _pool.withResource(() async {
       try {
         final dir = await getTemporaryDirectory();
@@ -33,24 +36,32 @@ class YoutubeService {
         final file = File(filePath);
 
         if (file.existsSync()) {
+          onProgress?.call(1.0);
           return filePath;
         }
 
         final manifest = await _youtubeExplode.videos.streamsClient
             .getManifest(VideoId(videoId));
         final audioStreamInfo = manifest.audioOnly.sortByBitrate().firstOrNull;
+        if (audioStreamInfo == null) return null;
 
-        if (audioStreamInfo == null) {
-          return null;
-        }
-
+        final size = audioStreamInfo.size.totalBytes;
         final stream =
             _youtubeExplode.videos.streamsClient.get(audioStreamInfo);
         final fileStream = file.openWrite();
-        await stream.pipe(fileStream);
+        var downloaded = 0;
+
+        await for (final data in stream) {
+          downloaded += data.length;
+          onProgress?.call(downloaded / size);
+          print(
+              '>>.. Downloaded: $downloaded/$size ${(downloaded / size) * 100}');
+          fileStream.add(data);
+        }
         await fileStream.flush();
         await fileStream.close();
 
+        onProgress?.call(1.0);
         return filePath;
       } catch (e) {
         return null;

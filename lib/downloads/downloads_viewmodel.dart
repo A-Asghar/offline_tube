@@ -1,3 +1,4 @@
+import 'package:offline_tube/services/current_playing_service.dart';
 import 'package:stacked/stacked.dart';
 import 'package:audio_service/audio_service.dart';
 import 'package:offline_tube/services/audio_service.dart';
@@ -12,12 +13,8 @@ class DownloadsViewModel extends BaseViewModel {
   bool isLoading = false;
   List<VideoWrapper> items = [];
 
-  VideoWrapper? _currentPlaying;
-  VideoWrapper? get currentPlaying => _currentPlaying;
-  set currentPlaying(VideoWrapper? value) {
-    _currentPlaying = value;
-    notifyListeners();
-  }
+  bool get showCurrentPlaying => currentPlayingService.playing.value != null;
+  MediaItem get currentPlaying => currentPlayingService.playing.value!;
 
   Future<void> init() async {
     isLoading = true;
@@ -27,6 +24,10 @@ class DownloadsViewModel extends BaseViewModel {
 
     await _getData();
     await _downloadData();
+    _listenToCurrentPosition();
+    _listenToTotalDuration();
+    _listenToChangesInSong();
+    _listenToPlaybackState();
 
     isLoading = false;
     notifyListeners();
@@ -57,10 +58,9 @@ class DownloadsViewModel extends BaseViewModel {
     notifyListeners();
   }
 
-  Future<void> onTapPlay(int index) async {
+  Future<void> onTapItem(int index) async {
     await _audioHandler.skipToQueueItem(index);
     _audioHandler.play();
-    currentPlaying = items[index];
   }
 
   Future<void> onTapDelete(int index) async {
@@ -75,5 +75,59 @@ class DownloadsViewModel extends BaseViewModel {
     items.removeAt(index);
 
     notifyListeners();
+  }
+
+  void onPreviousTap() => _audioHandler.skipToPrevious();
+  void onNextTap() => _audioHandler.skipToNext();
+  void onTapPause() => _audioHandler.pause();
+  void onSeek(Duration position) => _audioHandler.seek(position);
+  void onTapPlay() => _audioHandler.play();
+
+  void _listenToCurrentPosition() {
+    AudioService.position.listen((position) {
+      final oldState = currentPlayingService.progressBarState.value;
+      currentPlayingService.progressBarState.value = ProgressBarState(
+        current: position,
+        buffered: oldState.buffered,
+        total: oldState.total,
+      );
+    });
+  }
+
+  void _listenToTotalDuration() {
+    _audioHandler.mediaItem.listen((mediaItem) {
+      final oldState = currentPlayingService.progressBarState.value;
+      currentPlayingService.progressBarState.value = ProgressBarState(
+        current: oldState.current,
+        buffered: oldState.buffered,
+        total: mediaItem?.duration ?? Duration.zero,
+      );
+    });
+  }
+
+  void _listenToChangesInSong() {
+    _audioHandler.mediaItem.listen((item) async {
+      if (item == null) return;
+      currentPlayingService.playing.value = item;
+      notifyListeners();
+    });
+  }
+
+  void _listenToPlaybackState() {
+    _audioHandler.playbackState.listen((playbackState) {
+      final isPlaying = playbackState.playing;
+      final processingState = playbackState.processingState;
+      if (processingState == AudioProcessingState.loading ||
+          processingState == AudioProcessingState.buffering) {
+        currentPlayingService.playPauseButtonState.value = ButtonState.loading;
+      } else if (!isPlaying) {
+        currentPlayingService.playPauseButtonState.value = ButtonState.paused;
+      } else if (processingState != AudioProcessingState.completed) {
+        currentPlayingService.playPauseButtonState.value = ButtonState.playing;
+      } else {
+        _audioHandler.seek(Duration.zero);
+        _audioHandler.pause();
+      }
+    });
   }
 }
