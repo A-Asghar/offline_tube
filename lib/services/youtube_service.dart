@@ -1,6 +1,7 @@
-// lib/services/youtube_service.dart
 import 'dart:io';
 import 'package:flutter/foundation.dart';
+import 'package:offline_tube/main.dart';
+import 'package:offline_tube/services/downloads_service.dart';
 import 'package:offline_tube/util/video_extensions.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
@@ -27,7 +28,7 @@ class YoutubeService {
 
   Future<String?> downloadAudioToTemp(
     String videoId, {
-    Function(double progress)? onProgress,
+    DownloadingProgress? progress,
   }) async {
     return _pool.withResource(() async {
       try {
@@ -36,7 +37,6 @@ class YoutubeService {
         final file = File(filePath);
 
         if (file.existsSync()) {
-          onProgress?.call(1.0);
           return filePath;
         }
 
@@ -53,15 +53,21 @@ class YoutubeService {
 
         await for (final data in stream) {
           downloaded += data.length;
-          onProgress?.call(downloaded / size);
-          print(
-              '>>.. Downloaded: $downloaded/$size ${(downloaded / size) * 100}');
+          if (progress == null) return null;
+          downloadsService.updateProgress(
+            videoId,
+            DownloadingProgress(
+              progress: downloaded / size,
+              thumbUrl: progress.thumbUrl,
+              title: progress.title,
+            ),
+          );
           fileStream.add(data);
         }
         await fileStream.flush();
         await fileStream.close();
 
-        onProgress?.call(1.0);
+        downloadsService.remove(videoId);
         return filePath;
       } catch (e) {
         return null;

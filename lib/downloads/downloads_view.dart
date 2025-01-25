@@ -5,8 +5,10 @@ import 'package:offline_tube/downloads/downloads_viewmodel.dart';
 import 'package:offline_tube/downloads/widgets/buttons.dart';
 import 'package:offline_tube/downloads/widgets/download_item.dart';
 import 'package:offline_tube/downloads/widgets/download_item_shimmer.dart';
+import 'package:offline_tube/downloads/widgets/download_progress_item.dart';
 import 'package:offline_tube/downloads/widgets/seek_bar.dart';
 import 'package:offline_tube/main.dart';
+import 'package:offline_tube/services/downloads_service.dart';
 import 'package:stacked/stacked.dart';
 
 class DownloadsView extends StatelessWidget {
@@ -30,6 +32,24 @@ class DownloadsView extends StatelessWidget {
                     child: Column(
                       children: [
                         const SizedBox(height: 16),
+                        StreamBuilder<Map<String, DownloadingProgress>>(
+                          stream: downloadsService.progressStream,
+                          builder: (context, snapshot) {
+                            if (!snapshot.hasData) {
+                              return const SizedBox.shrink();
+                            }
+                            final progress = snapshot.data!;
+                            return Column(
+                              children: progress.keys
+                                  .map(
+                                    (k) => DownloadProgressItem(
+                                      item: progress[k],
+                                    ),
+                                  )
+                                  .toList(),
+                            );
+                          },
+                        ),
                         if (model.showCurrentPlaying) ...[
                           _CurrentPlaying(
                             item: model.currentPlaying,
