@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:offline_tube/main.dart';
@@ -51,25 +52,41 @@ class YoutubeService {
         final fileStream = file.openWrite();
         var downloaded = 0;
 
-        await for (final data in stream) {
-          downloaded += data.length;
-          if (progress == null) return null;
-          downloadsService.updateProgress(
-            videoId,
-            DownloadingProgress(
-              progress: downloaded / size,
-              thumbUrl: progress.thumbUrl,
-              title: progress.title,
-            ),
-          );
-          fileStream.add(data);
-        }
-        await fileStream.flush();
-        await fileStream.close();
+        StreamSubscription<List<int>> subscription;
+        subscription = stream.listen(
+          (data) {
+            downloaded += data.length;
+            progress?.progress = downloaded / size;
+            if (progress != null) {
+              downloadsService.updateProgress(
+                videoId,
+                DownloadingProgress(
+                  progress: progress.progress,
+                  thumbUrl: progress.thumbUrl,
+                  title: progress.title,
+                ),
+              );
+            }
 
-        downloadsService.remove(videoId);
+            fileStream.add(data);
+          },
+          onDone: () async {
+            await fileStream.flush();
+            await fileStream.close();
+            downloadsService.remove(videoId);
+          },
+          onError: (e) {
+            debugPrint('Download error for $videoId: $e');
+            downloadsService.remove(videoId);
+          },
+          cancelOnError: true,
+        );
+
+        downloadsService.addSubscription(videoId, subscription);
+
         return filePath;
       } catch (e) {
+        debugPrint('Error downloading audio for $videoId: $e');
         return null;
       }
     });

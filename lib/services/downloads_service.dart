@@ -7,6 +7,8 @@ class DownloadsService with ListenableServiceMixin {
   static final DownloadsService _instance = DownloadsService._singleton();
   static DownloadsService get instance => _instance;
 
+  final Map<String, StreamSubscription<List<int>>> _subscriptions = {};
+
   final _progressController =
       StreamController<Map<String, DownloadingProgress>>.broadcast();
 
@@ -27,8 +29,27 @@ class DownloadsService with ListenableServiceMixin {
     _progressController.add(Map<String, DownloadingProgress>.from(_progress));
   }
 
+  void addSubscription(String videoId, StreamSubscription<List<int>> sub) {
+    _subscriptions[videoId] = sub;
+  }
+
+  void pauseAllDownloads() {
+    for (var subscription in _subscriptions.values) {
+      subscription.pause();
+    }
+  }
+
+  void resumeAllDownloads() {
+    for (var subscription in _subscriptions.values) {
+      subscription.resume();
+    }
+  }
+
   void dispose() {
     _progressController.close();
+    for (var subscription in _subscriptions.values) {
+      subscription.cancel();
+    }
   }
 }
 
