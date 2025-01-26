@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:offline_tube/widgets/loading_widget.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 class DownloadItem extends StatelessWidget {
@@ -115,10 +116,24 @@ class _DeleteDialogState extends State<DeleteDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Delete video'),
+      backgroundColor: Colors.black,
+      title: const Text(
+        'Delete video',
+        style: TextStyle(
+          color: Colors.white,
+        ),
+      ),
       content: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : const Text('Are you sure you want to delete this video?'),
+          ? const Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [Loading()],
+            )
+          : const Text(
+              'Are you sure you want to delete this video?',
+              style: TextStyle(
+                color: Colors.white,
+              ),
+            ),
       actions: _isLoading
           ? []
           : [
@@ -126,7 +141,12 @@ class _DeleteDialogState extends State<DeleteDialog> {
                 onPressed: () {
                   Navigator.pop(context);
                 },
-                child: const Text('Cancel'),
+                child: const Text(
+                  'Cancel',
+                  style: TextStyle(
+                    color: Colors.white,
+                  ),
+                ),
               ),
               TextButton(
                 onPressed: () async {
@@ -137,7 +157,12 @@ class _DeleteDialogState extends State<DeleteDialog> {
                   // ignore: use_build_context_synchronously
                   Navigator.pop(context);
                 },
-                child: const Text('Delete'),
+                child: const Text(
+                  'Delete',
+                  style: TextStyle(
+                    color: Colors.white,
+                  ),
+                ),
               ),
             ],
     );

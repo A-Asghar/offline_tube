@@ -1,11 +1,20 @@
 import 'dart:async';
 
+import 'package:observable_ish/observable_ish.dart';
+import 'package:offline_tube/main.dart';
+import 'package:offline_tube/util/video_extensions.dart';
 import 'package:stacked/stacked.dart';
 
 class DownloadsService with ListenableServiceMixin {
   DownloadsService._singleton();
   static final DownloadsService _instance = DownloadsService._singleton();
   static DownloadsService get instance => _instance;
+
+  DownloadsService() {
+    listenToReactiveValues([completedDownload]);
+  }
+
+  RxValue<VideoWrapper?> completedDownload = RxValue<VideoWrapper?>(null);
 
   final Map<String, StreamSubscription<List<int>>> _subscriptions = {};
 
@@ -43,6 +52,13 @@ class DownloadsService with ListenableServiceMixin {
     for (var subscription in _subscriptions.values) {
       subscription.resume();
     }
+  }
+
+  void handleDownloadComplete(String videoId) {
+    VideoWrapper video = videoService.downloadedVideos.firstWhere(
+      (element) => element.video.id.value == videoId,
+    );
+    completedDownload.value = video;
   }
 
   void dispose() {

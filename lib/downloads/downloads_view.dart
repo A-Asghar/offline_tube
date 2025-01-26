@@ -11,13 +11,24 @@ import 'package:offline_tube/main.dart';
 import 'package:offline_tube/services/downloads_service.dart';
 import 'package:stacked/stacked.dart';
 
-class DownloadsView extends StatelessWidget {
+class DownloadsView extends StatefulWidget {
   const DownloadsView({super.key});
 
   @override
+  State<DownloadsView> createState() => _DownloadsViewState();
+}
+
+class _DownloadsViewState extends State<DownloadsView>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
   Widget build(BuildContext context) {
+    super.build(context);
     return ViewModelBuilder<DownloadsViewModel>.reactive(
       viewModelBuilder: () => DownloadsViewModel(),
+      disposeViewModel: false,
       onViewModelReady: (model) => model.init(),
       builder: (context, model, child) {
         return Scaffold(
@@ -32,24 +43,6 @@ class DownloadsView extends StatelessWidget {
                     child: Column(
                       children: [
                         const SizedBox(height: 16),
-                        StreamBuilder<Map<String, DownloadingProgress>>(
-                          stream: downloadsService.progressStream,
-                          builder: (context, snapshot) {
-                            if (!snapshot.hasData) {
-                              return const SizedBox.shrink();
-                            }
-                            final progress = snapshot.data!;
-                            return Column(
-                              children: progress.keys
-                                  .map(
-                                    (k) => DownloadProgressItem(
-                                      item: progress[k],
-                                    ),
-                                  )
-                                  .toList(),
-                            );
-                          },
-                        ),
                         if (model.showCurrentPlaying) ...[
                           _CurrentPlaying(
                             item: model.currentPlaying,
@@ -61,6 +54,42 @@ class DownloadsView extends StatelessWidget {
                           ),
                           const SizedBox(height: 16),
                         ],
+                        StreamBuilder<Map<String, DownloadingProgress>>(
+                          stream: downloadsService.progressStream,
+                          builder: (context, snapshot) {
+                            if (!snapshot.hasData) {
+                              return const SizedBox.shrink();
+                            }
+                            final progress = snapshot.data!;
+                            if (progress.isEmpty) {
+                              return const SizedBox.shrink();
+                            }
+                            return SizedBox(
+                              height: 160,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    'Downloading',
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Expanded(
+                                    child: ListView(
+                                      children: progress.keys
+                                          .map(
+                                            (k) => DownloadProgressItem(
+                                              item: progress[k],
+                                            ),
+                                          )
+                                          .toList(),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
                         Expanded(
                           child: ListView.builder(
                             itemCount: model.items.length,
@@ -103,7 +132,7 @@ class _CurrentPlaying extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.1),
         borderRadius: BorderRadius.circular(12),

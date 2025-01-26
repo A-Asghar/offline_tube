@@ -10,6 +10,10 @@ import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 final _audioHandler = getIt<CustomAudioHandler>();
 
 class DownloadsViewModel extends BaseViewModel {
+  DownloadsViewModel() {
+    _initCompletedDownloadStream();
+  }
+
   bool isLoading = false;
   List<VideoWrapper> items = [];
 
@@ -33,6 +37,15 @@ class DownloadsViewModel extends BaseViewModel {
     notifyListeners();
   }
 
+  void _initCompletedDownloadStream() {
+    downloadsService.completedDownload.listen((videoWrapper) async {
+      if (videoWrapper == null) return;
+      items.add(videoWrapper);
+      _downloadData(item: videoWrapper);
+      notifyListeners();
+    });
+  }
+
   MediaItem _createMediaItem(String path, Video video) {
     return MediaItem(
       id: video.id.value,
@@ -44,7 +57,14 @@ class DownloadsViewModel extends BaseViewModel {
     );
   }
 
-  Future<void> _downloadData() async {
+  Future<void> _downloadData({VideoWrapper? item}) async {
+    if (item != null) {
+      final path = await downLoadToTemp(item.video.id.value);
+      if (path == null) return;
+      await _audioHandler.addQueueItem(_createMediaItem(path, item.video));
+      return;
+    }
+
     for (final videoWrapper in items) {
       final video = videoWrapper.video;
       final path = await downLoadToTemp(video.id.value);

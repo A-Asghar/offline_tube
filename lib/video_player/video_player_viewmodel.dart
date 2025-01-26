@@ -78,8 +78,8 @@ class VideoPlayerViewModel extends BaseViewModel {
   Future<void> handleDownload() async {
     if (isDownloaded || isDownloading) return;
 
-    // isDownloading = true;
-    // notifyListeners();
+    isDownloading = true;
+    notifyListeners();
 
     try {
       DownloadingProgress downloadItem = DownloadingProgress(
@@ -87,20 +87,20 @@ class VideoPlayerViewModel extends BaseViewModel {
         title: video.video.title,
         progress: 0.0,
       );
-      showSnackBar(text: 'Video added to downloads', isError: false);
 
       await downLoadToTemp(video.video.id.value, progress: downloadItem);
       await videoService.addToLocal(item: video.video.downloaded);
       videoService.downloadedVideos.add(video);
+      // showSnackBar(text: 'Added to downloads', isError: false);
 
       isDownloaded = true;
-      // isDownloading = false;
+      isDownloading = false;
       notifyListeners();
     } catch (e) {
       downloadsService.remove(video.video.id.value);
       showSnackBar(text: 'Download failed');
-      // isDownloading = false;
-      // notifyListeners();
+      isDownloading = false;
+      notifyListeners();
       rethrow;
     }
   }

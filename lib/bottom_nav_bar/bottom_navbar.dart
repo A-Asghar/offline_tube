@@ -44,7 +44,18 @@ class _BottomNavbarState extends State<BottomNavbar>
       viewModelBuilder: () => BottomNavbarViewmodel(),
       builder: (_, model, __) {
         return Scaffold(
-          body: _GetPage(index: model.selectedIndex),
+          body: PageView(
+            physics: const NeverScrollableScrollPhysics(),
+            controller: model.pageController,
+            onPageChanged: (index) {
+              model.selectedIndex = index;
+            },
+            children: const [
+              _GetPage(index: 0),
+              _GetPage(index: 1),
+              _GetPage(index: 2),
+            ],
+          ),
           bottomNavigationBar: BottomNavigationBar(
             iconSize: 16,
             selectedFontSize: 12,
@@ -83,11 +94,11 @@ class _GetPage extends StatelessWidget {
   Widget build(BuildContext context) {
     switch (index) {
       case 0:
-        return const HomeView();
+        return const HomeView(key: PageStorageKey('HomeView'));
       case 1:
-        return const SearchView();
+        return const SearchView(key: PageStorageKey('SearchView'));
       case 2:
-        return const DownloadsView();
+        return const DownloadsView(key: PageStorageKey('DownloadsView'));
     }
     return const SizedBox.shrink();
   }

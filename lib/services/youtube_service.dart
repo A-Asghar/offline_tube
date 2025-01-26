@@ -74,6 +74,7 @@ class YoutubeService {
             await fileStream.flush();
             await fileStream.close();
             downloadsService.remove(videoId);
+            downloadsService.handleDownloadComplete(videoId);
           },
           onError: (e) {
             debugPrint('Download error for $videoId: $e');
