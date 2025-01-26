@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:offline_tube/main.dart';
 import 'package:offline_tube/services/downloads_service.dart';
 import 'package:offline_tube/util/util.dart';
@@ -78,8 +79,8 @@ class VideoPlayerViewModel extends BaseViewModel {
   Future<void> handleDownload() async {
     if (isDownloaded || isDownloading) return;
 
-    isDownloading = true;
-    notifyListeners();
+    // isDownloading = true;
+    // notifyListeners();
 
     try {
       DownloadingProgress downloadItem = DownloadingProgress(
@@ -87,16 +88,30 @@ class VideoPlayerViewModel extends BaseViewModel {
         title: video.video.title,
         progress: 0.0,
       );
+      ScaffoldMessenger.of(currentContext!).showSnackBar(
+        const SnackBar(
+          content: Text('Video added to downloads'),
+          duration: Duration(seconds: 2),
+          backgroundColor: Colors.green,
+        ),
+      );
       await downLoadToTemp(video.video.id.value, progress: downloadItem);
       await videoService.addToLocal(item: video.video.downloaded);
       videoService.downloadedVideos.add(video);
 
       isDownloaded = true;
-      isDownloading = false;
+      // isDownloading = false;
       notifyListeners();
     } catch (e) {
-      isDownloading = false;
-      notifyListeners();
+      downloadsService.remove(video.video.id.value);
+      ScaffoldMessenger.of(currentContext!).showSnackBar(
+        const SnackBar(
+          content: Text('Download failed'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      // isDownloading = false;
+      // notifyListeners();
       rethrow;
     }
   }
