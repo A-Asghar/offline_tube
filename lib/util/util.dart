@@ -63,5 +63,15 @@ String formatCount(int count) {
   }
 }
 
+void showSnackBar({required String text, bool isError = true}) {
+  ScaffoldMessenger.of(currentContext!).showSnackBar(
+    SnackBar(
+      content: Text(text),
+      duration: const Duration(seconds: 2),
+      backgroundColor: isError ? null : Colors.green,
+    ),
+  );
+}
+
 final currentContext = NavigationService.navigatorKey.currentContext;
 double width = MediaQuery.of(currentContext!).size.width;
