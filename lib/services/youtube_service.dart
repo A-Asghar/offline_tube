@@ -122,6 +122,36 @@ class YoutubeService {
   void dispose() {
     _youtubeExplode.close();
   }
+
+  Future<MyData> getData(String videoId) async {
+    var stopwatch = Stopwatch()..start();
+    var yt = YoutubeExplode();
+    var manifest = await yt.videos.streams.getManifest(videoId);
+    var videoStreams = manifest.streams
+        .where((s) => s is VideoOnlyStreamInfo)
+        .cast<VideoOnlyStreamInfo>()
+        .toList()
+      ..sort((a, b) =>
+          b.videoResolution.height.compareTo(a.videoResolution.height));
+    var bestVideo = videoStreams.first;
+    var audioStreams = manifest.streams
+        .where((s) => s is AudioOnlyStreamInfo)
+        .cast<AudioOnlyStreamInfo>()
+        .toList()
+      ..sort((a, b) => b.bitrate.compareTo(a.bitrate));
+    var bestAudio = audioStreams.first;
+    String videoUrl = bestVideo.url.toString();
+    String audioUrl = bestAudio.url.toString();
+    stopwatch.stop();
+    print('getData executed in ${stopwatch.elapsedMilliseconds} ms');
+    return MyData(audioUrl: audioUrl, videoUrl: videoUrl);
+  }
+}
+
+class MyData {
+  final String audioUrl;
+  final String videoUrl;
+  MyData({required this.audioUrl, required this.videoUrl});
 }
 
 // Future<File?> getVideo(String videoId) async {
