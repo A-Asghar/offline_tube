@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:offline_tube/util/util.dart';
 import 'package:offline_tube/widgets/loading_widget.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
@@ -26,12 +27,39 @@ class DownloadItem extends StatelessWidget {
         ),
         child: Row(
           children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: CachedNetworkImage(
-                imageUrl: video.thumbnails.mediumResUrl,
-                height: 80,
-              ),
+            Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: CachedNetworkImage(
+                    imageUrl: video.thumbnails.mediumResUrl,
+                    height: 80,
+                  ),
+                ),
+                Positioned(
+                  bottom: 0,
+                  right: 0,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.6),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    padding: const EdgeInsets.all(6),
+                    margin: const EdgeInsets.only(right: 4, bottom: 4),
+                    child: Text(
+                      formatDuration(
+                        video.duration ?? const Duration(seconds: 0),
+                      ),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 9,
+                        letterSpacing: 1.6,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
             const SizedBox(width: 6),
             Expanded(
