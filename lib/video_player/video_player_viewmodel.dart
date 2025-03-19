@@ -1,4 +1,5 @@
 import 'package:offline_tube/main.dart';
+import 'package:offline_tube/services/downloads_service.dart';
 import 'package:offline_tube/util/util.dart';
 import 'package:offline_tube/util/video_extensions.dart';
 import 'package:stacked/stacked.dart';
@@ -81,14 +82,23 @@ class VideoPlayerViewModel extends BaseViewModel {
     notifyListeners();
 
     try {
-      await downLoadToTemp(video.video.id.value);
+      DownloadingProgress downloadItem = DownloadingProgress(
+        thumbUrl: video.video.thumbnails.mediumResUrl,
+        title: video.video.title,
+        progress: 0.0,
+      );
+
+      await downLoadToTemp(video, progress: downloadItem);
       await videoService.addToLocal(item: video.video.downloaded);
-      videoService.downloadedVideos.add(video);
+      // videoService.downloadedVideos.add(video);
+      // showSnackBar(text: 'Added to downloads', isError: false);
 
       isDownloaded = true;
       isDownloading = false;
       notifyListeners();
     } catch (e) {
+      downloadsService.remove(video.video.id.value);
+      showSnackBar(text: 'Download failed');
       isDownloading = false;
       notifyListeners();
       rethrow;

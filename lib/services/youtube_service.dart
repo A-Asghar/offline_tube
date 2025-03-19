@@ -1,6 +1,8 @@
-// lib/services/youtube_service.dart
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
+import 'package:offline_tube/main.dart';
+import 'package:offline_tube/services/downloads_service.dart';
 import 'package:offline_tube/util/video_extensions.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
@@ -25,7 +27,11 @@ class YoutubeService {
     return await _youtubeExplode.search.search(query);
   }
 
-  Future<String?> downloadAudioToTemp(String videoId) async {
+  Future<String?> downloadAudioToTemp(
+    VideoWrapper video, {
+    DownloadingProgress? progress,
+  }) async {
+    String videoId = video.video.id.value;
     return _pool.withResource(() async {
       try {
         final dir = await getTemporaryDirectory();
@@ -36,23 +42,54 @@ class YoutubeService {
           return filePath;
         }
 
-        final manifest = await _youtubeExplode.videos.streamsClient
-            .getManifest(VideoId(videoId));
+        final manifest = await _youtubeExplode.videos.streamsClient.getManifest(
+          VideoId(videoId),
+        );
         final audioStreamInfo = manifest.audioOnly.sortByBitrate().firstOrNull;
+        if (audioStreamInfo == null) return null;
 
-        if (audioStreamInfo == null) {
-          return null;
-        }
-
+        final size = audioStreamInfo.size.totalBytes;
         final stream =
             _youtubeExplode.videos.streamsClient.get(audioStreamInfo);
         final fileStream = file.openWrite();
-        await stream.pipe(fileStream);
-        await fileStream.flush();
-        await fileStream.close();
+        var downloaded = 0;
+
+        StreamSubscription<List<int>> subscription;
+        subscription = stream.listen(
+          (data) {
+            downloaded += data.length;
+            progress?.progress = downloaded / size;
+            if (progress != null) {
+              downloadsService.updateProgress(
+                videoId,
+                DownloadingProgress(
+                  progress: progress.progress,
+                  thumbUrl: progress.thumbUrl,
+                  title: progress.title,
+                ),
+              );
+            }
+
+            fileStream.add(data);
+          },
+          onDone: () async {
+            await fileStream.flush();
+            await fileStream.close();
+            downloadsService.remove(videoId);
+            downloadsService.handleDownloadComplete(video);
+          },
+          onError: (e) {
+            debugPrint('Download error for $videoId: $e');
+            downloadsService.remove(videoId);
+          },
+          cancelOnError: true,
+        );
+
+        downloadsService.addSubscription(videoId, subscription);
 
         return filePath;
       } catch (e) {
+        debugPrint('Error downloading audio for $videoId: $e');
         return null;
       }
     });
@@ -87,6 +124,36 @@ class YoutubeService {
   void dispose() {
     _youtubeExplode.close();
   }
+
+  // Future<MyData> getData(String videoId) async {
+  //   var stopwatch = Stopwatch()..start();
+  //   var yt = YoutubeExplode();
+  //   var manifest = await yt.videos.streams.getManifest(videoId);
+  //   var videoStreams = manifest.streams
+  //       .where((s) => s is VideoOnlyStreamInfo)
+  //       .cast<VideoOnlyStreamInfo>()
+  //       .toList()
+  //     ..sort((a, b) =>
+  //         b.videoResolution.height.compareTo(a.videoResolution.height));
+  //   var bestVideo = videoStreams.first;
+  //   var audioStreams = manifest.streams
+  //       .where((s) => s is AudioOnlyStreamInfo)
+  //       .cast<AudioOnlyStreamInfo>()
+  //       .toList()
+  //     ..sort((a, b) => b.bitrate.compareTo(a.bitrate));
+  //   var bestAudio = audioStreams.first;
+  //   String videoUrl = bestVideo.url.toString();
+  //   String audioUrl = bestAudio.url.toString();
+  //   stopwatch.stop();
+  //   print('getData executed in ${stopwatch.elapsedMilliseconds} ms');
+  //   return MyData(audioUrl: audioUrl, videoUrl: videoUrl);
+  // }
+}
+
+class MyData {
+  final String audioUrl;
+  final String videoUrl;
+  MyData({required this.audioUrl, required this.videoUrl});
 }
 
 // Future<File?> getVideo(String videoId) async {

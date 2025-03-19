@@ -1,0 +1,198 @@
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/material.dart';
+import 'package:offline_tube/util/util.dart';
+import 'package:offline_tube/widgets/loading_widget.dart';
+import 'package:youtube_explode_dart/youtube_explode_dart.dart';
+
+class DownloadItem extends StatelessWidget {
+  const DownloadItem({
+    super.key,
+    required this.video,
+    required this.onTapDelete,
+    required this.onTap,
+  });
+  final Video video;
+  final Future<void> Function()? onTapDelete;
+  final Function() onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+        margin: const EdgeInsets.only(bottom: 16),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: CachedNetworkImage(
+                    imageUrl: video.thumbnails.mediumResUrl,
+                    height: 80,
+                  ),
+                ),
+                Positioned(
+                  bottom: 0,
+                  right: 0,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.6),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    padding: const EdgeInsets.all(6),
+                    margin: const EdgeInsets.only(right: 4, bottom: 4),
+                    child: Text(
+                      formatDuration(
+                        video.duration ?? const Duration(seconds: 0),
+                      ),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 9,
+                        letterSpacing: 1.6,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(width: 6),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    video.title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Flexible(
+                        flex: 3,
+                        child: Text(
+                          video.author,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 10,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                      Flexible(
+                        flex: 1,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(6),
+                          onTap: onTapDelete == null
+                              ? null
+                              : () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) {
+                                      return DeleteDialog(
+                                        onTapDelete: onTapDelete!,
+                                      );
+                                    },
+                                  );
+                                },
+                          child: onTapDelete == null
+                              ? const SizedBox.shrink()
+                              : const Icon(
+                                  Icons.delete,
+                                  color: Colors.red,
+                                  size: 26,
+                                ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class DeleteDialog extends StatefulWidget {
+  final Future<void> Function() onTapDelete;
+
+  const DeleteDialog({super.key, required this.onTapDelete});
+
+  @override
+  State<DeleteDialog> createState() => _DeleteDialogState();
+}
+
+class _DeleteDialogState extends State<DeleteDialog> {
+  bool _isLoading = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      backgroundColor: Colors.black,
+      title: const Text(
+        'Delete video',
+        style: TextStyle(
+          color: Colors.white,
+        ),
+      ),
+      content: _isLoading
+          ? const Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [Loading()],
+            )
+          : const Text(
+              'Are you sure you want to delete this video?',
+              style: TextStyle(
+                color: Colors.white,
+              ),
+            ),
+      actions: _isLoading
+          ? []
+          : [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: const Text(
+                  'Cancel',
+                  style: TextStyle(
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+              TextButton(
+                onPressed: () async {
+                  setState(() {
+                    _isLoading = true;
+                  });
+                  await widget.onTapDelete();
+                  // ignore: use_build_context_synchronously
+                  Navigator.pop(context);
+                },
+                child: const Text(
+                  'Delete',
+                  style: TextStyle(
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ],
+    );
+  }
+}

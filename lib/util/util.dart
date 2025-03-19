@@ -2,7 +2,9 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:offline_tube/main.dart';
+import 'package:offline_tube/services/downloads_service.dart';
 import 'package:offline_tube/services/navigation_service.dart';
+import 'package:offline_tube/util/video_extensions.dart';
 import 'package:path_provider/path_provider.dart';
 
 String formatDuration(Duration duration) {
@@ -40,8 +42,14 @@ Future<void> deleteDownload(String videoId) async {
   }
 }
 
-Future<String?> downLoadToTemp(String videoId) async {
-  return await youtubeService.downloadAudioToTemp(videoId);
+Future<String?> downLoadToTemp(
+  VideoWrapper videoId, {
+  DownloadingProgress? progress,
+}) async {
+  return await youtubeService.downloadAudioToTemp(
+    videoId,
+    progress: progress,
+  );
 }
 
 String formatCount(int count) {
@@ -54,6 +62,16 @@ String formatCount(int count) {
   } else {
     return count.toString();
   }
+}
+
+void showSnackBar({required String text, bool isError = true}) {
+  ScaffoldMessenger.of(currentContext!).showSnackBar(
+    SnackBar(
+      content: Text(text),
+      duration: const Duration(seconds: 2),
+      backgroundColor: isError ? null : Colors.green,
+    ),
+  );
 }
 
 final currentContext = NavigationService.navigatorKey.currentContext;
