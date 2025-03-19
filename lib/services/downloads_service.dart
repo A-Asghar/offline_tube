@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:observable_ish/observable_ish.dart';
-import 'package:offline_tube/main.dart';
 import 'package:offline_tube/util/video_extensions.dart';
 import 'package:stacked/stacked.dart';
 
@@ -54,10 +53,7 @@ class DownloadsService with ListenableServiceMixin {
     }
   }
 
-  void handleDownloadComplete(String videoId) {
-    VideoWrapper video = videoService.downloadedVideos.firstWhere(
-      (element) => element.video.id.value == videoId,
-    );
+  void handleDownloadComplete(VideoWrapper video) {
     completedDownload.value = video;
   }
 

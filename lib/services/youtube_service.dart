@@ -28,9 +28,10 @@ class YoutubeService {
   }
 
   Future<String?> downloadAudioToTemp(
-    String videoId, {
+    VideoWrapper video, {
     DownloadingProgress? progress,
   }) async {
+    String videoId = video.video.id.value;
     return _pool.withResource(() async {
       try {
         final dir = await getTemporaryDirectory();
@@ -41,8 +42,9 @@ class YoutubeService {
           return filePath;
         }
 
-        final manifest = await _youtubeExplode.videos.streamsClient
-            .getManifest(VideoId(videoId));
+        final manifest = await _youtubeExplode.videos.streamsClient.getManifest(
+          VideoId(videoId),
+        );
         final audioStreamInfo = manifest.audioOnly.sortByBitrate().firstOrNull;
         if (audioStreamInfo == null) return null;
 
@@ -74,7 +76,7 @@ class YoutubeService {
             await fileStream.flush();
             await fileStream.close();
             downloadsService.remove(videoId);
-            downloadsService.handleDownloadComplete(videoId);
+            downloadsService.handleDownloadComplete(video);
           },
           onError: (e) {
             debugPrint('Download error for $videoId: $e');
@@ -123,29 +125,29 @@ class YoutubeService {
     _youtubeExplode.close();
   }
 
-  Future<MyData> getData(String videoId) async {
-    var stopwatch = Stopwatch()..start();
-    var yt = YoutubeExplode();
-    var manifest = await yt.videos.streams.getManifest(videoId);
-    var videoStreams = manifest.streams
-        .where((s) => s is VideoOnlyStreamInfo)
-        .cast<VideoOnlyStreamInfo>()
-        .toList()
-      ..sort((a, b) =>
-          b.videoResolution.height.compareTo(a.videoResolution.height));
-    var bestVideo = videoStreams.first;
-    var audioStreams = manifest.streams
-        .where((s) => s is AudioOnlyStreamInfo)
-        .cast<AudioOnlyStreamInfo>()
-        .toList()
-      ..sort((a, b) => b.bitrate.compareTo(a.bitrate));
-    var bestAudio = audioStreams.first;
-    String videoUrl = bestVideo.url.toString();
-    String audioUrl = bestAudio.url.toString();
-    stopwatch.stop();
-    print('getData executed in ${stopwatch.elapsedMilliseconds} ms');
-    return MyData(audioUrl: audioUrl, videoUrl: videoUrl);
-  }
+  // Future<MyData> getData(String videoId) async {
+  //   var stopwatch = Stopwatch()..start();
+  //   var yt = YoutubeExplode();
+  //   var manifest = await yt.videos.streams.getManifest(videoId);
+  //   var videoStreams = manifest.streams
+  //       .where((s) => s is VideoOnlyStreamInfo)
+  //       .cast<VideoOnlyStreamInfo>()
+  //       .toList()
+  //     ..sort((a, b) =>
+  //         b.videoResolution.height.compareTo(a.videoResolution.height));
+  //   var bestVideo = videoStreams.first;
+  //   var audioStreams = manifest.streams
+  //       .where((s) => s is AudioOnlyStreamInfo)
+  //       .cast<AudioOnlyStreamInfo>()
+  //       .toList()
+  //     ..sort((a, b) => b.bitrate.compareTo(a.bitrate));
+  //   var bestAudio = audioStreams.first;
+  //   String videoUrl = bestVideo.url.toString();
+  //   String audioUrl = bestAudio.url.toString();
+  //   stopwatch.stop();
+  //   print('getData executed in ${stopwatch.elapsedMilliseconds} ms');
+  //   return MyData(audioUrl: audioUrl, videoUrl: videoUrl);
+  // }
 }
 
 class MyData {

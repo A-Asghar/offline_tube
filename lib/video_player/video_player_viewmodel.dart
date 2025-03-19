@@ -88,9 +88,9 @@ class VideoPlayerViewModel extends BaseViewModel {
         progress: 0.0,
       );
 
-      await downLoadToTemp(video.video.id.value, progress: downloadItem);
+      await downLoadToTemp(video, progress: downloadItem);
       await videoService.addToLocal(item: video.video.downloaded);
-      videoService.downloadedVideos.add(video);
+      // videoService.downloadedVideos.add(video);
       // showSnackBar(text: 'Added to downloads', isError: false);
 
       isDownloaded = true;

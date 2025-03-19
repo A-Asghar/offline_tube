@@ -59,7 +59,7 @@ class DownloadsViewModel extends BaseViewModel {
 
   Future<void> _downloadData({VideoWrapper? item}) async {
     if (item != null) {
-      final path = await downLoadToTemp(item.video.id.value);
+      final path = await downLoadToTemp(item);
       if (path == null) return;
       await _audioHandler.addQueueItem(_createMediaItem(path, item.video));
       return;
@@ -67,7 +67,7 @@ class DownloadsViewModel extends BaseViewModel {
 
     for (final videoWrapper in items) {
       final video = videoWrapper.video;
-      final path = await downLoadToTemp(video.id.value);
+      final path = await downLoadToTemp(videoWrapper);
       if (path == null) continue;
       await _audioHandler.addQueueItem(_createMediaItem(path, video));
     }
@@ -93,6 +93,9 @@ class DownloadsViewModel extends BaseViewModel {
 
     videoService.downloadedVideos.remove(videoWrapper);
     items.removeAt(index);
+    if (items.isEmpty) {
+      currentPlayingService.playing.value = null;
+    }
 
     notifyListeners();
   }
