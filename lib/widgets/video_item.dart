@@ -27,7 +27,7 @@ class VideoItem extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(
-              height: 180,
+              height: context.screenHeight * 0.25,
               child: Stack(
                 children: [
                   ClipRRect(

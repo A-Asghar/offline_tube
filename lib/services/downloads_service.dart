@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:observable_ish/observable_ish.dart';
+import 'package:offline_tube/main.dart';
 import 'package:offline_tube/util/video_extensions.dart';
 import 'package:stacked/stacked.dart';
 
@@ -54,7 +55,10 @@ class DownloadsService with ListenableServiceMixin {
   }
 
   void handleDownloadComplete(VideoWrapper video) {
-    completedDownload.value = video;
+    final downloadedWrapper = VideoWrapper(video: video.video, isDownloaded: true);
+    videoService.addToLocal(item: downloadedWrapper);
+    videoService.downloadedVideos.add(downloadedWrapper);
+    completedDownload.value = downloadedWrapper;
   }
 
   void dispose() {

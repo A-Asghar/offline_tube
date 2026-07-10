@@ -34,11 +34,11 @@ class YoutubeService {
     String videoId = video.video.id.value;
     return _pool.withResource(() async {
       try {
-        final dir = await getTemporaryDirectory();
+        final dir = await getApplicationDocumentsDirectory();
         final filePath = '${dir.path}/temp_audio_$videoId';
         final file = File(filePath);
 
-        if (file.existsSync()) {
+        if (file.existsSync() && file.lengthSync() > 0) {
           return filePath;
         }
 
@@ -51,19 +51,30 @@ class YoutubeService {
         final size = audioStreamInfo.size.totalBytes;
         final stream =
             _youtubeExplode.videos.streamsClient.get(audioStreamInfo);
-        final fileStream = file.openWrite();
+
+        final partFilePath = '$filePath.part';
+        final partFile = File(partFilePath);
+        if (partFile.existsSync()) {
+          try {
+            partFile.deleteSync();
+          } catch (_) {}
+        }
+
+        final fileStream = partFile.openWrite();
         var downloaded = 0;
+        final completer = Completer<String?>();
 
         StreamSubscription<List<int>> subscription;
         subscription = stream.listen(
           (data) {
             downloaded += data.length;
-            progress?.progress = downloaded / size;
+            final currentProgress = downloaded / size;
+            progress?.progress = currentProgress;
             if (progress != null) {
               downloadsService.updateProgress(
                 videoId,
                 DownloadingProgress(
-                  progress: progress.progress,
+                  progress: currentProgress,
                   thumbUrl: progress.thumbUrl,
                   title: progress.title,
                 ),
@@ -73,21 +84,48 @@ class YoutubeService {
             fileStream.add(data);
           },
           onDone: () async {
-            await fileStream.flush();
-            await fileStream.close();
-            downloadsService.remove(videoId);
-            downloadsService.handleDownloadComplete(video);
+            try {
+              await fileStream.flush();
+              await fileStream.close();
+              if (partFile.existsSync()) {
+                if (file.existsSync()) {
+                  try {
+                    file.deleteSync();
+                  } catch (_) {}
+                }
+                await partFile.rename(filePath);
+              }
+              downloadsService.remove(videoId);
+              downloadsService.handleDownloadComplete(video);
+              if (!completer.isCompleted) {
+                completer.complete(filePath);
+              }
+            } catch (e) {
+              debugPrint('Error finishing download for $videoId: $e');
+              if (!completer.isCompleted) {
+                completer.complete(null);
+              }
+            }
           },
-          onError: (e) {
+          onError: (e) async {
             debugPrint('Download error for $videoId: $e');
+            try {
+              await fileStream.close();
+              if (partFile.existsSync()) {
+                partFile.deleteSync();
+              }
+            } catch (_) {}
             downloadsService.remove(videoId);
+            if (!completer.isCompleted) {
+              completer.complete(null);
+            }
           },
           cancelOnError: true,
         );
 
         downloadsService.addSubscription(videoId, subscription);
 
-        return filePath;
+        return completer.future;
       } catch (e) {
         debugPrint('Error downloading audio for $videoId: $e');
         return null;

@@ -101,7 +101,19 @@ class HomeViewModel extends BaseViewModel {
 
   Future<List<VideoWrapper>> _getRandom(int val) async {
     final List<VideoWrapper> videos = videoService.visitedVideos;
-    if (videos.isEmpty) return [];
+    if (videos.isEmpty) {
+      try {
+        final searchResult = await youtubeService.search(query: 'lofi hip hop');
+        if (searchResult != null && searchResult.isNotEmpty) {
+          final mapped = searchResult.map((e) => e.unDownloaded).toList();
+          mapped.shuffle(Random());
+          return mapped.take(val).toList();
+        }
+      } catch (e) {
+        debugPrint('Fallback search failed: $e');
+      }
+      return [];
+    }
     final List<VideoWrapper> shuffled = List.from(videos)..shuffle(Random());
     return shuffled.take(val).toList();
   }

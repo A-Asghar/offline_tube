@@ -65,7 +65,7 @@ class DownloadsViewModel extends BaseViewModel {
       return;
     }
 
-    for (final videoWrapper in items) {
+    for (final videoWrapper in List<VideoWrapper>.from(items)) {
       final video = videoWrapper.video;
       final path = await downLoadToTemp(videoWrapper);
       if (path == null) continue;

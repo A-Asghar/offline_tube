@@ -29,7 +29,7 @@ String cutText({
 }
 
 Future<void> deleteDownload(String videoId) async {
-  final dir = await getTemporaryDirectory();
+  final dir = await getApplicationDocumentsDirectory();
   final filePath = '${dir.path}/temp_audio_$videoId';
   final file = File(filePath);
 
@@ -74,5 +74,10 @@ void showSnackBar({required String text, bool isError = true}) {
   );
 }
 
-final currentContext = NavigationService.navigatorKey.currentContext;
-double width = MediaQuery.of(currentContext!).size.width;
+BuildContext? get currentContext => NavigationService.navigatorKey.currentContext;
+
+extension ContextExtensions on BuildContext {
+  double get screenWidth => MediaQuery.of(this).size.width;
+  double get screenHeight => MediaQuery.of(this).size.height;
+}
+

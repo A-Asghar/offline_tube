@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:offline_tube/main.dart';
 import 'package:offline_tube/services/current_playing_service.dart';
+import 'package:offline_tube/util/util.dart';
 import 'package:offline_tube/widgets/loading_widget.dart';
 
 class PreviousSongButton extends StatelessWidget {
@@ -18,7 +19,7 @@ class PreviousSongButton extends StatelessWidget {
           Colors.white,
           BlendMode.srcIn,
         ),
-        height: 22,
+        height: context.screenHeight * 0.025,
       ),
     );
   }
@@ -32,8 +33,8 @@ class PlayPauseButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 20,
-      width: 20,
+      height: context.screenHeight * 0.05,
+      width: context.screenWidth * 0.05,
       child: StreamBuilder<ButtonState>(
         stream: currentPlayingService.playPauseButtonState.values,
         builder: (_, buttonState) {
@@ -85,7 +86,7 @@ class NextSongButton extends StatelessWidget {
           Colors.white,
           BlendMode.srcIn,
         ),
-        height: 22,
+        height: context.screenHeight * 0.025,
       ),
     );
   }

@@ -12,12 +12,12 @@ class _DownloadItemShimmer extends StatelessWidget {
       highlightColor: Colors.grey.shade700,
       child: Container(
         margin: const EdgeInsets.only(bottom: 16),
-        height: 80,
+        height: context.screenHeight * 0.1,
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(
-              height: 80,
+              height: context.screenHeight * 0.1,
               width: 120,
               child: Container(
                 decoration: BoxDecoration(
@@ -45,7 +45,7 @@ class _DownloadItemShimmer extends StatelessWidget {
                   const SizedBox(height: 12),
                   Container(
                     height: 15,
-                    width: width * 0.3,
+                    width: context.screenWidth * 0.3,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(6),
                       color: Colors.black,
