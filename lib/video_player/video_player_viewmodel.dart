@@ -88,12 +88,13 @@ class VideoPlayerViewModel extends BaseViewModel {
         progress: 0.0,
       );
 
-      await downLoadToTemp(video, progress: downloadItem);
-      await videoService.addToLocal(item: video.video.downloaded);
-      // videoService.downloadedVideos.add(video);
-      // showSnackBar(text: 'Added to downloads', isError: false);
-
-      isDownloaded = true;
+      final path = await downLoadToTemp(video, progress: downloadItem);
+      if (path != null) {
+        isDownloaded = true;
+        showSnackBar(text: 'Added to downloads', isError: false);
+      } else {
+        showSnackBar(text: 'Download failed');
+      }
       isDownloading = false;
       notifyListeners();
     } catch (e) {
@@ -101,7 +102,6 @@ class VideoPlayerViewModel extends BaseViewModel {
       showSnackBar(text: 'Download failed');
       isDownloading = false;
       notifyListeners();
-      rethrow;
     }
   }
 

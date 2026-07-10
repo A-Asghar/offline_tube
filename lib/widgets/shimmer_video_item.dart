@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:offline_tube/util/util.dart';
 import 'package:shimmer/shimmer.dart';
 
 class ShimmerVideoItem extends StatelessWidget {
@@ -15,7 +16,7 @@ class ShimmerVideoItem extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(
-              height: 180,
+              height: context.screenHeight * 0.25,
               child: Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),

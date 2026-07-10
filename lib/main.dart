@@ -31,6 +31,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         fontFamily: 'Poppins',
         scaffoldBackgroundColor: const Color(0xFF151414),
@@ -38,6 +39,38 @@ class MyApp extends StatelessWidget {
       ),
       home: const BottomNavbar(),
       navigatorKey: NavigationService.navigatorKey,
+    );
+  }
+}
+
+class NewPage extends StatelessWidget {
+  const NewPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SafeArea(
+        child: ListView.builder(
+          itemCount: 20,
+          itemBuilder: (context, index) => const MyContainer(),
+        ),
+      ),
+    );
+  }
+}
+
+class MyContainer extends StatelessWidget {
+  const MyContainer({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.all(20),
+      height: MediaQuery.of(context).size.height * 0.3,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        color: Colors.red,
+      ),
     );
   }
 }

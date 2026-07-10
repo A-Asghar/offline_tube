@@ -42,7 +42,7 @@ class DownloadProgressItem extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           SizedBox(
-            width: width * 0.9,
+            width: context.screenWidth * 0.9,
             child: Row(
               children: [
                 Expanded(
