@@ -22,9 +22,14 @@ class YoutubeService {
     required String query,
     VideoSearchList? list,
   }) async {
-    if (list != null) return await list.nextPage();
+    try {
+      if (list != null) return await list.nextPage();
 
-    return await _youtubeExplode.search.search(query);
+      return await _youtubeExplode.search.search(query);
+    } catch (e) {
+      debugPrint('Search failed for "$query": $e');
+      return null;
+    }
   }
 
   Future<String?> downloadAudioToTemp(
@@ -44,15 +49,43 @@ class YoutubeService {
 
         final manifest = await _youtubeExplode.videos.streamsClient.getManifest(
           VideoId(videoId),
+          ytClients: [
+            YoutubeApiClient.androidSdkless,
+            YoutubeApiClient.tv,
+          ],
         );
-        final audioStreamInfo = manifest.audioOnly.sortByBitrate().firstOrNull;
+        final audioOnly = manifest.audioOnly;
+        AudioOnlyStreamInfo? audioStreamInfo = audioOnly
+            .where((e) => e.container.name == 'mp4')
+            .sortByBitrate()
+            .firstOrNull;
+        audioStreamInfo ??= audioOnly.sortByBitrate().firstOrNull;
         if (audioStreamInfo == null) return null;
 
+        final containerExtension = audioStreamInfo.container.name == 'webm'
+            ? 'webm'
+            : audioStreamInfo.container.name == '3gpp'
+                ? '3gp'
+                : 'm4a';
+        debugPrint(
+          'Selected audio stream for $videoId: itag=${audioStreamInfo.tag}, '
+          'container=${audioStreamInfo.container.name}, '
+          'codec=${audioStreamInfo.codec}',
+        );
+        final extFile = File('$filePath.$containerExtension');
+        if (extFile.existsSync() && extFile.lengthSync() > 0) {
+          return extFile.path;
+        }
+
         final size = audioStreamInfo.size.totalBytes;
+        if (size <= 0) {
+          debugPrint('Audio stream for $videoId has invalid size: $size, '
+              'downloading without progress tracking');
+        }
         final stream =
             _youtubeExplode.videos.streamsClient.get(audioStreamInfo);
 
-        final partFilePath = '$filePath.part';
+        final partFilePath = '${extFile.path}.part';
         final partFile = File(partFilePath);
         if (partFile.existsSync()) {
           try {
@@ -68,7 +101,7 @@ class YoutubeService {
         subscription = stream.listen(
           (data) {
             downloaded += data.length;
-            final currentProgress = downloaded / size;
+            final currentProgress = size > 0 ? downloaded / size : 0.0;
             progress?.progress = currentProgress;
             if (progress != null) {
               downloadsService.updateProgress(
@@ -88,17 +121,17 @@ class YoutubeService {
               await fileStream.flush();
               await fileStream.close();
               if (partFile.existsSync()) {
-                if (file.existsSync()) {
+                if (extFile.existsSync()) {
                   try {
-                    file.deleteSync();
+                    extFile.deleteSync();
                   } catch (_) {}
                 }
-                await partFile.rename(filePath);
+                await partFile.rename(extFile.path);
               }
               downloadsService.remove(videoId);
               downloadsService.handleDownloadComplete(video);
               if (!completer.isCompleted) {
-                completer.complete(filePath);
+                completer.complete(extFile.path);
               }
             } catch (e) {
               debugPrint('Error finishing download for $videoId: $e');
@@ -126,8 +159,9 @@ class YoutubeService {
         downloadsService.addSubscription(videoId, subscription);
 
         return completer.future;
-      } catch (e) {
+      } catch (e, stackTrace) {
         debugPrint('Error downloading audio for $videoId: $e');
+        debugPrintStack(stackTrace: stackTrace);
         return null;
       }
     });

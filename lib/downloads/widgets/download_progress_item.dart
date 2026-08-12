@@ -1,7 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:offline_tube/services/downloads_service.dart';
-import 'package:offline_tube/util/util.dart';
 
 class DownloadProgressItem extends StatelessWidget {
   const DownloadProgressItem({super.key, required this.item});
@@ -41,30 +40,12 @@ class DownloadProgressItem extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 6),
-          SizedBox(
-            width: context.screenWidth * 0.9,
-            child: Row(
-              children: [
-                Expanded(
-                  child: LinearProgressIndicator(
-                    value: item!.progress,
-                    borderRadius: BorderRadius.circular(12),
-                    backgroundColor: Colors.white.withOpacity(0.2),
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(width: 4),
-                SizedBox(
-                  width: 40,
-                  child: Text(
-                    '${(item!.progress * 100).toStringAsFixed(2)}%',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 8,
-                    ),
-                  ),
-                ),
-              ],
+          const SizedBox(
+            width: 24,
+            height: 24,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: Colors.white,
             ),
           ),
         ],

@@ -144,12 +144,18 @@ class _CurrentPlaying extends StatelessWidget {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(6),
-                child: CachedNetworkImage(
-                  imageUrl: item.artUri?.toString() ?? '',
-                  height: 60,
-                  width: 60,
-                  fit: BoxFit.cover,
-                ),
+                child: item.artUri != null
+                    ? CachedNetworkImage(
+                        imageUrl: item.artUri.toString(),
+                        height: 60,
+                        width: 60,
+                        fit: BoxFit.cover,
+                      )
+                    : Container(
+                        height: 60,
+                        width: 60,
+                        color: Colors.white.withOpacity(0.1),
+                      ),
               ),
               const SizedBox(width: 6),
               Expanded(

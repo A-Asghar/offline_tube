@@ -17,11 +17,16 @@ CurrentPlayingService currentPlayingService = CurrentPlayingService();
 DownloadsService downloadsService = DownloadsService.instance;
 
 void main() async {
-  getIt.registerSingleton<CustomAudioHandler>(await initAudioService());
   WidgetsFlutterBinding.ensureInitialized();
 
+  if (!getIt.isRegistered<CustomAudioHandler>()) {
+    getIt.registerSingleton<CustomAudioHandler>(await initAudioService());
+  }
+
   await Hive.initFlutter();
-  Hive.registerAdapter(VideoWrapperAdapter());
+  if (!Hive.isAdapterRegistered(0)) {
+    Hive.registerAdapter(VideoWrapperAdapter());
+  }
   runApp(const MyApp());
 }
 

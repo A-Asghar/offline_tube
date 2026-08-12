@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:offline_tube/services/current_playing_service.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:stacked/stacked.dart';
 import 'package:audio_service/audio_service.dart';
 import 'package:offline_tube/services/audio_service.dart';
@@ -59,7 +62,7 @@ class DownloadsViewModel extends BaseViewModel {
 
   Future<void> _downloadData({VideoWrapper? item}) async {
     if (item != null) {
-      final path = await downLoadToTemp(item);
+      final path = await _resolveLocalAudioPath(item.video.id.value);
       if (path == null) return;
       await _audioHandler.addQueueItem(_createMediaItem(path, item.video));
       return;
@@ -67,10 +70,22 @@ class DownloadsViewModel extends BaseViewModel {
 
     for (final videoWrapper in List<VideoWrapper>.from(items)) {
       final video = videoWrapper.video;
-      final path = await downLoadToTemp(videoWrapper);
+      final path = await _resolveLocalAudioPath(video.id.value);
       if (path == null) continue;
       await _audioHandler.addQueueItem(_createMediaItem(path, video));
     }
+  }
+
+  Future<String?> _resolveLocalAudioPath(String videoId) async {
+    final dir = await getApplicationDocumentsDirectory();
+    for (final ext in const ['m4a', 'webm', '3gp', '']) {
+      final file = File('${dir.path}/temp_audio_$videoId'
+          '${ext.isEmpty ? '' : '.$ext'}');
+      if (file.existsSync() && file.lengthSync() > 0) {
+        return file.path;
+      }
+    }
+    return null;
   }
 
   Future<void> _getData() async {

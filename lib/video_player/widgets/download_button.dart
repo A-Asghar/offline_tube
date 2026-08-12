@@ -24,11 +24,11 @@ class DownloadButton extends ViewModelWidget<VideoPlayerViewModel> {
             children: [
               if (viewModel.isDownloading)
                 const SizedBox(
-                  height: 20,
-                  width: 20,
+                  width: 24,
+                  height: 24,
                   child: CircularProgressIndicator(
+                    strokeWidth: 2,
                     color: Colors.white,
-                    strokeWidth: 3,
                   ),
                 )
               else ...[

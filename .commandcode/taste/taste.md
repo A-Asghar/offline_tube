@@ -1,0 +1,1 @@
+- Prefers real, end-to-end functional verification (e.g., actually downloading a video on a device/emulator and confirming it appears and plays) over running integration tests that are known to not work or that silently swallow failures. Confidence: 0.9
